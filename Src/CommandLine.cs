@@ -126,7 +126,7 @@ namespace OldFiles
                         .ToArray();
                     SpacingFunc = age =>
                     {
-                        var relevant = list.FirstOrDefault(v => v.Limit <= age);
+                        var relevant = list.LastOrDefault(v => v.Limit <= age);
                         if (relevant == null)
                             return 0; // if there is no entry with a limit of 0, all files younger than the first limit are never considered old.
                         return relevant.Relative ? (relevant.Val * age) : (relevant.Val);

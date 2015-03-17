@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -100,7 +101,7 @@ namespace OldFiles
                     // --spacing fixed:15
                     var value = Spacing.Substring(6);
                     double spacing;
-                    if (!double.TryParse(value, out spacing))
+                    if (!double.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out spacing))
                         return @"Cannot parse the {field}Spacing{} parameter: the {h}fixed{} value should be a number.";
                     SpacingFunc = age => spacing;
                 }
@@ -121,7 +122,7 @@ namespace OldFiles
                         return @"Cannot parse the {field}Spacing{} parameter. Extraneous characters in the {h}list{} specifier: ""{0}""".Fmt(RhoML.Escape(value.Substring(cur)));
                     // Construct the spacing function
                     var list = matches
-                        .Select(m => new { Limit = double.Parse(m.Groups["limit"].Value), Val = double.Parse(m.Groups["value"].Value), Relative = m.Groups["rel"].Success })
+                        .Select(m => new { Limit = double.Parse(m.Groups["limit"].Value, CultureInfo.InvariantCulture), Val = double.Parse(m.Groups["value"].Value, CultureInfo.InvariantCulture), Relative = m.Groups["rel"].Success })
                         .OrderBy(m => m.Limit)
                         .ToArray();
                     SpacingFunc = age =>

@@ -18,7 +18,7 @@ namespace OldFiles
         [Option("-f", "--filter")]
         public string Filter;
 
-        [DocumentationRhoML("{h}Recursively process subdirectories.{}\nWhen specified, all files in all directories are grouped by name and considered together. When omitted, each folder passed to {field}Folders{} is considered separately from other folders.")]
+        [DocumentationRhoML("{h}Recursively process subdirectories.{}\nWhen specified, all files in all directories are grouped by name and considered together. When omitted, each directory passed to {field}Dirs{} is considered separately from other directories.")]
         [Option("-r", "--recursive")]
         public bool Recursive;
 
@@ -47,9 +47,9 @@ namespace OldFiles
         [Option("-e", "--execute")]
         public string Execute;
 
-        [DocumentationRhoML("{h}The folder(s) to be scanned for old files.{}")]
+        [DocumentationRhoML("{h}The directories to be scanned for old files.{}")]
         [IsPositional, IsMandatory]
-        public string[] Folders;
+        public string[] Dirs;
 
         [Ignore]
         public Regex FilterRegex;
@@ -137,10 +137,10 @@ namespace OldFiles
                     return @"Cannot parse the {field}Spacing{} parameter.";
             }
 
-            foreach (var folder in Folders)
+            foreach (var dir in Dirs)
             {
-                if (!Directory.Exists(folder))
-                    return @"Folder not found: {h}{0}{}".Fmt(RhoML.Escape(folder));
+                if (!Directory.Exists(dir))
+                    return @"Directory not found: {h}{0}{}".Fmt(RhoML.Escape(dir));
             }
 
             return null;

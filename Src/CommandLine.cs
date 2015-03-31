@@ -14,7 +14,7 @@ namespace OldFiles
     {
 #pragma warning disable 0649 // Field is never assigned to
 
-        [DocumentationRhoML("{h}Restrict analysis to files whose names match this regular expression.{}")]
+        [DocumentationRhoML("{h}Restrict analysis to files whose names match this regular expression.{}\nThe regular expression is applied to the full file path.")]
         [Option("-f", "--filter")]
         public string Filter;
 
@@ -34,6 +34,10 @@ namespace OldFiles
         [DocumentationRhoML("{h}All files spaced more closely than specified in {field}Spacing{} should be deemed old.{}")]
         [Option("-s", "--spacing")]
         public string Spacing;
+
+        [DocumentationRhoML("{h}Files matching this regular expression will not be deemed old, no matter what the spacing is.{}\nThe regular expression is applied to the full file path.")]
+        [Option("--always-keep")]
+        public string AlwaysKeep;
 
         [DocumentationRhoML("{h}A regular expression specifying how timestamps should be parsed.{}\nThe regex must contain named groups {h}y{}, {h}m{}, {h}d{}, and may also contain groups {h}th{}, {h}tm{}, {h}ts{}. Only files whose names match this regex are analysed. Matched parts are highlighted white in the verbose output. The default format matches timestamps like {h}\"YYYY-MM-DD\"{}, {h}\"YYYY-MM-DD.hh-mm-ss\"{} and {h}\"YYYY-MM-DD hhmmss\"{} (seconds optional).\nIf a group named {h}g{} is present, the matched string is used to group the files. Multiple groups may be named {h}g{} in the same regex if necessary. The matched part is highlighted yellow in the verbose output.")]
         [Option("-t", "--timestamp")]
@@ -57,12 +61,13 @@ namespace OldFiles
 
         [Ignore]
         public Regex FilterRegex;
+        [Ignore]
+        public Regex AlwaysKeepRegex;
+        [Ignore]
+        public Regex TimestampFormatRegex;
 
         [Ignore]
         public Func<double, double> SpacingFunc;
-
-        [Ignore]
-        public Regex TimestampFormatRegex;
 
 #pragma warning restore 0649 // Field is never assigned to
 
@@ -81,6 +86,12 @@ namespace OldFiles
             {
                 try { FilterRegex = new Regex(Filter, RegexOptions.IgnoreCase | RegexOptions.Singleline); }
                 catch (Exception e) { return "The value you provided for {field}Filter{} is not a valid regular expression: {0}".Fmt(RhoML.Escape(e.Message)); }
+            }
+
+            if (AlwaysKeep != null)
+            {
+                try { AlwaysKeepRegex = new Regex(AlwaysKeep, RegexOptions.IgnoreCase | RegexOptions.Singleline); }
+                catch (Exception e) { return "The value you provided for {field}AlwaysKeep{} is not a valid regular expression: {0}".Fmt(RhoML.Escape(e.Message)); }
             }
 
             if (TimestampFormat == null)

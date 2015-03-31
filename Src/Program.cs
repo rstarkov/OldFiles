@@ -57,7 +57,7 @@ namespace OldFiles
             {
                 handleDir(dir.GetFiles());
                 if (recurse)
-                foreach (var d in dir.GetDirectories())
+                    foreach (var d in dir.GetDirectories())
                         scanDir(d, recurse, handleDir);
             }
             catch (UnauthorizedAccessException)
@@ -83,6 +83,7 @@ namespace OldFiles
             public State State { get; set; }
             public double Age { get { return (Now - Timestamp).TotalDays; } }
             public double Spacing { get { return Args.SpacingFunc(Age); } }
+            public bool WasAlwaysKeep = false;
 
             public info(FileInfo file, Match match)
             {
@@ -130,6 +131,13 @@ namespace OldFiles
                 // Apply max age
                 foreach (var file in group.Where(f => f.Age > Args.MaxAge))
                     file.State = State.Old;
+                // Apply always-keep
+                if (Args.AlwaysKeepRegex != null)
+                    foreach (var file in group.Where(f => Args.AlwaysKeepRegex.IsMatch(f.File.FullName)))
+                    {
+                        file.State = State.Keep;
+                        file.WasAlwaysKeep = true;
+                    }
                 // Apply spacing
                 Old.ApplySpacing(group);
                 // Now actually process the old files as required
@@ -144,7 +152,7 @@ namespace OldFiles
 #endif
                         ConsoleUtil.Write("  " + file.ColoredName + ", ");
                         ConsoleUtil.Write(file.Age.ToString("0.0") + " days old, ");
-                        ConsoleUtil.Write(file.State == State.Old ? "remove".Color(ConsoleColor.Red) : "keep".Color(ConsoleColor.Green));
+                        ConsoleUtil.Write(file.WasAlwaysKeep ? "always-keep".Color(ConsoleColor.Cyan) : file.State == State.Old ? "remove".Color(ConsoleColor.Red) : "keep".Color(ConsoleColor.Green));
                         Console.WriteLine(dbg);
                     }
                     if (file.State == State.Keep)

@@ -62,11 +62,13 @@ namespace OldFiles
                 ConsoleUtil.WriteLine("Error: ".Color(ConsoleColor.Red) + "not authorized to list directory contents: " + dir.FullName, stdErr: true);
                 HadProblems = true;
             }
+#if !DEBUG
             catch (Exception e)
             {
                 ConsoleUtil.WriteLine("Error: ".Color(ConsoleColor.Red) + dir.FullName + ": " + e.Message, stdErr: true);
                 HadProblems = true;
             }
+#endif
         }
 
         private class info

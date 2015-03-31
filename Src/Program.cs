@@ -22,6 +22,9 @@ namespace OldFiles
         {
             if (args.Length == 2 && args[0] == "--post-build-check")
                 return Ut.RunPostBuildChecks(args[1], Assembly.GetExecutingAssembly());
+#if DEBUG
+            OldFilesTests.Run();
+#endif
 
             Args = CommandLineParser.ParseOrWriteUsageToConsole<CommandLine>(args);
             if (Args == null)
@@ -71,14 +74,15 @@ namespace OldFiles
 #endif
         }
 
-        private class info
+        private class info : IOldItem
         {
             public FileInfo File;
             public DateTime Timestamp;
             public string BareName;
             public ConsoleColoredString ColoredName;
-            public bool Old = false;
+            public State State { get; set; }
             public double Age { get { return (Now - Timestamp).TotalDays; } }
+            public double Spacing { get { return Args.SpacingFunc(Age); } }
 
             public info(FileInfo file, Match match)
             {
@@ -125,35 +129,25 @@ namespace OldFiles
                     ConsoleUtil.WriteLine("Group: ".Color(ConsoleColor.Cyan) + group.Key);
                 // Apply max age
                 foreach (var file in group.Where(f => f.Age > Args.MaxAge))
-                    file.Old = true;
+                    file.State = State.Old;
                 // Apply spacing
-                var remaining = group.Where(f => !f.Old).OrderByDescending(f => f.Age).ToList();
-                var prev = remaining.Count > 0 ? remaining[0] : null;
-                for (int i = 1; i < remaining.Count - 1; i++)
-                {
-                    var gap = prev.Age - remaining[i + 1].Age;
-                    var wantedGap = Args.SpacingFunc(remaining[i + 1].Age);
-                    if (gap <= wantedGap)
-                        remaining[i].Old = true;
-                    else
-                        prev = remaining[i];
-                }
+                Old.ApplySpacing(group);
                 // Now actually process the old files as required
                 foreach (var file in group.OrderByDescending(f => f.Age))
                 {
-                    if (Args.Verbose || file.Old)
+                    if (Args.Verbose || file.State == State.Old)
                     {
                         var dbg = "";
 #if DEBUG
-                        try { dbg = ", gap {0:0.0}, wanted {1:0.0}".Fmt(file.Age - group.Where(f => !f.Old && f.Age < file.Age).Max(f => f.Age), Args.SpacingFunc(file.Age)); }
+                        try { dbg = ", gap {0:0.0}, wanted {1:0.0}".Fmt(file.Age - group.Where(f => f.State == State.Keep && f.Age < file.Age).Max(f => f.Age), file.Spacing); }
                         catch { }
 #endif
                         ConsoleUtil.Write("  " + file.ColoredName + ", ");
                         ConsoleUtil.Write(file.Age.ToString("0.0") + " days old, ");
-                        ConsoleUtil.Write(file.Old ? "remove".Color(ConsoleColor.Red) : "keep".Color(ConsoleColor.Green));
+                        ConsoleUtil.Write(file.State == State.Old ? "remove".Color(ConsoleColor.Red) : "keep".Color(ConsoleColor.Green));
                         Console.WriteLine(dbg);
                     }
-                    if (!file.Old)
+                    if (file.State == State.Keep)
                         continue;
                     bool executeOK = true;
                     if (Args.Execute != null)

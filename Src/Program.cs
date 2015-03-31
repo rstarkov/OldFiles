@@ -26,7 +26,7 @@ namespace OldFiles
             OldFilesTests.Run();
 #endif
 
-            Args = CommandLineParser.ParseOrWriteUsageToConsole<CommandLine>(args);
+            Args = CommandLineParser.ParseOrWriteUsageToConsole<CommandLine>(args, helpProcessor: str => str.ReplaceText("$(Version)", "v{0:000}".Fmt(Assembly.GetExecutingAssembly().GetName().Version.Major)));
             if (Args == null)
                 return 1;
 

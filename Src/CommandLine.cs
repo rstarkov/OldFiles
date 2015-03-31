@@ -10,6 +10,7 @@ using RT.Util.ExtensionMethods;
 
 namespace OldFiles
 {
+    [DocumentationRhoML("{h}OldFiles{}\nVersion $(Version)\n\nAnalyses directories to find groups of files with the same name except for a timestamp. Calculates how to thin out the group by deleting some of the timestamped files while maintaining a minimum spacing, in days, between the remaining files. Lists and optionally deletes or otherwise processes those files deemed too old to keep. ")]
     sealed class CommandLine : ICommandLineValidatable
     {
 #pragma warning disable 0649 // Field is never assigned to
@@ -30,8 +31,7 @@ namespace OldFiles
         [Option("-m", "--max-age")]
         public double MaxAge = double.MaxValue;
 
-#warning Expand documentation here
-        [DocumentationRhoML("{h}All files spaced more closely than specified in {field}Spacing{} should be deemed old.{}")]
+        [DocumentationRhoML("{h}All files spaced more closely than specified in {field}Spacing{} should be deemed old.{}\nTwo formats are supported. The fixed format specifies the same spacing, in days, for all files: \"{h}--spacing fixed:15{}\". The list format: \"{h}--spacing list:[5,2][30,1.5age]{}\" specifies a spacing of 0 for files up to 5 days old, a spacing of 2 days for files older than 5 days, and a spacing of 1.5 * file age (in days) for files older than 30 days.")]
         [Option("-s", "--spacing")]
         public string Spacing;
 

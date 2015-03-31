@@ -28,11 +28,19 @@ namespace OldFiles
                 return 1;
 
             Now = DateTime.Now; // so that it's fixed throughout the entire run
-            if (Args.Recursive)
-                processDir(findAllFilesRecursive());
-            else
+
+            if (Args.Unify)
+            {
+                var files = new List<FileInfo>();
                 foreach (var dir in Args.Dirs)
-                    processDir(new DirectoryInfo(dir).GetFiles());
+                    scanDir(new DirectoryInfo(dir), Args.Recurse, fs => files.AddRange(fs));
+                processDir(files);
+            }
+            else
+            {
+                foreach (var dir in Args.Dirs)
+                    scanDir(new DirectoryInfo(dir), Args.Recurse, fs => processDir(fs));
+            }
 
             if (HadProblems)
                 ConsoleUtil.WriteLine("Warning: ".Color(ConsoleColor.Red) + "some errors have occurred during this run. Please review the stderr output for details.");
@@ -40,21 +48,14 @@ namespace OldFiles
             return HadProblems ? 1 : 0;
         }
 
-        private static IEnumerable<FileInfo> findAllFilesRecursive()
-        {
-            var result = new List<FileInfo>();
-            foreach (var dir in Args.Dirs)
-                addDir(new DirectoryInfo(dir), result);
-            return result;
-        }
-
-        private static void addDir(DirectoryInfo dir, List<FileInfo> files)
+        private static void scanDir(DirectoryInfo dir, bool recurse, Action<FileInfo[]> handleDir)
         {
             try
             {
-                files.AddRange(dir.GetFiles());
+                handleDir(dir.GetFiles());
+                if (recurse)
                 foreach (var d in dir.GetDirectories())
-                    addDir(d, files);
+                        scanDir(d, recurse, handleDir);
             }
             catch (UnauthorizedAccessException)
             {

@@ -18,9 +18,13 @@ namespace OldFiles
         [Option("-f", "--filter")]
         public string Filter;
 
-        [DocumentationRhoML("{h}Recursively process subdirectories.{}\nWhen specified, all files in all directories are grouped by name and considered together. When omitted, each directory passed to {field}Dirs{} is considered separately from other directories.")]
-        [Option("-r", "--recursive")]
-        public bool Recursive;
+        [DocumentationRhoML("{h}Recursively process subdirectories.{}\nSubdirectories of {field}Dirs{} are ignored unless this option is specified. Files are grouped and processed separately in each subdirectory, unless combined with {option}--unify{}.")]
+        [Option("-r", "--recurse")]
+        public bool Recurse;
+
+        [DocumentationRhoML("{h}Unify groups from all directories.{}\nWhen specified, all files in all directories are grouped by name and considered together. When omitted, each directory passed to {field}Dirs{} is considered separately from other directories.")]
+        [Option("-u", "--unify")]
+        public bool Unify;
 
         [DocumentationRhoML("{h}All files older than {field}Age{} should be deemed old.{}\nSpecified in days; fractions are permitted.")]
         [Option("-m", "--max-age")]

@@ -53,6 +53,8 @@ namespace OldFiles
 
         private static void scanDir(DirectoryInfo dir, bool recurse, Action<FileInfo[]> handleDir)
         {
+            if (!dir.Exists)
+                return;
             try
             {
                 handleDir(dir.GetFiles());

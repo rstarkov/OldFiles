@@ -55,6 +55,10 @@ namespace OldFiles
         [Option("-e", "--execute")]
         public string Execute;
 
+        [DocumentationRhoML("{h}Ignores all directories passed on the command line which do not exist.{}\nThe default behaviour is to display an error message and exit.")]
+        [Option("--ignore-non-existing")]
+        public bool IgnoreNonExisting;
+
         [DocumentationRhoML("{h}The directories to be scanned for old files.{}")]
         [IsPositional, IsMandatory]
         public string[] Dirs;
@@ -152,11 +156,12 @@ namespace OldFiles
                     return @"Cannot parse the {field}Spacing{} parameter.";
             }
 
-            foreach (var dir in Dirs)
-            {
-                if (!Directory.Exists(dir))
-                    return @"Directory not found: {h}{0}{}".Fmt(RhoML.Escape(dir));
-            }
+            if (!IgnoreNonExisting)
+                foreach (var dir in Dirs)
+                {
+                    if (!Directory.Exists(dir))
+                        return "Directory not found: {h}{0}{}.\nUse {option}--ignore-non-existing{} to suppress this error message.".Fmt(RhoML.Escape(dir));
+                }
 
             return null;
         }

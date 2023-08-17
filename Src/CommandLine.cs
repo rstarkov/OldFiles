@@ -1,15 +1,13 @@
-﻿using System;
-using System.Globalization;
-using System.IO;
-using System.Linq;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
+using RT.CommandLine;
 using RT.Util;
-using RT.Util.CommandLine;
 using RT.Util.Consoles;
 using RT.Util.ExtensionMethods;
 
 namespace OldFiles
 {
+    [CommandLine]
     [DocumentationRhoML("{h}OldFiles{}\nVersion $(Version)\n\nAnalyses directories to find groups of files with the same name except for a timestamp. Calculates how to thin out the group by deleting some of the timestamped files while maintaining a minimum spacing, in days, between the remaining files. Lists and optionally deletes or otherwise processes those files deemed too old to keep. ")]
     sealed class CommandLine : ICommandLineValidatable
     {

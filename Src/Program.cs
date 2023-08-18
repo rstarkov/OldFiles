@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using RT.CommandLine;
@@ -6,6 +7,8 @@ using RT.PostBuild;
 using RT.Util;
 using RT.Util.Consoles;
 using RT.Util.ExtensionMethods;
+
+[assembly: InternalsVisibleTo("OldFiles.Tests")]
 
 namespace OldFiles;
 
@@ -19,9 +22,6 @@ class Program
     {
         if (args.Length == 2 && args[0] == "--post-build-check")
             return PostBuildChecker.RunPostBuildChecks(args[1], Assembly.GetExecutingAssembly());
-#if DEBUG
-        OldFilesTests.Run();
-#endif
 
         Args = CommandLineParser.ParseOrWriteUsageToConsole<CommandLine>(args, helpProcessor: str => str.ReplaceText("$(Version)", "v{0:000}".Fmt(Assembly.GetExecutingAssembly().GetName().Version.Major)));
         if (Args == null)

@@ -109,7 +109,7 @@ class Program
                     bareName.Remove(group.Index, group.Length);
                 BareName = bareName.ToString();
             }
-            ColoredName = (File.FullName.Substring(0, File.FullName.Length - ColoredName.Length)).Color(ConsoleColor.DarkGray) + ColoredName;
+            ColoredName = (File.FullName[..^ColoredName.Length]).Color(ConsoleColor.DarkGray) + ColoredName;
         }
     }
 
@@ -121,7 +121,7 @@ class Program
             .Select(file => new { file, match = Args.TimestampFormatRegex.Match(file.Name) })
             .Where(f => f.match.Success)
             .Select(f => new info(f.file, f.match) { Timestamp = getTimestamp(f.file, f.match) })
-            .Where(f => f.Timestamp != default(DateTime))
+            .Where(f => f.Timestamp != default)
             .GroupBy(f => f.BareName);
         foreach (var group in groups)
         {
@@ -163,8 +163,8 @@ class Program
                     runner.Command = Args.Execute.Replace("{}", file.File.FullName);
                     if (Args.Verbose)
                     {
-                        runner.StdoutText += str => Console.Write(str);
-                        runner.StderrText += str => Console.Error.Write(str);
+                        runner.StdoutText += Console.Write;
+                        runner.StderrText += Console.Error.Write;
                     }
                     runner.Start();
                     runner.EndedWaitHandle.WaitOne();
@@ -187,13 +187,13 @@ class Program
     private static DateTime getTimestamp(FileInfo file, Match match)
     {
         if (!match.Groups["y"].Success && !match.Groups["m"].Success && !match.Groups["d"].Success)
-            return default(DateTime); // no warning in this case; the file simply doesn't have a timestamp
+            return default; // no warning in this case; the file simply doesn't have a timestamp
         if (!match.Groups["y"].Success || !match.Groups["m"].Success || !match.Groups["d"].Success)
         {
             ConsoleUtil.WriteLine("Error: ".Color(ConsoleColor.Red) + "the {field}TimestampFormat{} matches a year, a month or a day, but not all of them. File {0}".Fmt(
                 file.FullName), stdErr: true);
             HadProblems = true;
-            return default(DateTime);
+            return default;
         }
         bool hasH = match.Groups["th"].Success;
         bool hasM = match.Groups["tm"].Success;
@@ -203,7 +203,7 @@ class Program
             ConsoleUtil.WriteLine("Error: ".Color(ConsoleColor.Red) + "the {field}TimestampFormat{} matches seconds but not minutes, or minutes but not hours. File {0}".Fmt(
                 file.FullName), stdErr: true);
             HadProblems = true;
-            return default(DateTime);
+            return default;
         }
         try
         {
@@ -224,14 +224,12 @@ class Program
                 "y {0}, m {1}, d {2}".Fmt(match.Groups["y"].Value, match.Groups["m"].Value, match.Groups["d"].Value) + (time == "" ? "" : (", time " + time)),
                 file.FullName), stdErr: true);
             HadProblems = true;
-            return default(DateTime);
+            return default;
         }
     }
 
-#if DEBUG
     private static void PostBuildCheck(IPostBuildReporter rep)
     {
         CommandLineParser.PostBuildStep<CommandLine>(rep, null);
     }
-#endif
 }
